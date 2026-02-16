@@ -47,7 +47,7 @@ class APIHandler(BaseAPIHandler):
 class Aeroplane:
     """Класс для представления самолета"""
 
-    def __init__(self, callsign: str, country: str, velocity: float, altitude:float):
+    def __init__(self, callsign: str, country: str, velocity: float, altitude: float):
         self.callsign = callsign
         self.country = country
         self.velocity = velocity
@@ -56,7 +56,10 @@ class Aeroplane:
     @classmethod
     def cast_to_object_list(cls, aeroplanes: list) -> list:
         """Метод для преобразования списка данных о самолетах в список объектов класса Aeroplane"""
-        return [cls(callsign=aeroplane[1], country=aeroplane[2], velocity=aeroplane[9], altitude=aeroplane[13]) for aeroplane in aeroplanes]
+        return [
+            cls(callsign=aeroplane[1], country=aeroplane[2], velocity=aeroplane[9], altitude=aeroplane[13])
+            for aeroplane in aeroplanes
+        ]
 
     @staticmethod
     def get_top_altitude_aeroplanes(aeroplanes: list, top_n: int) -> list:

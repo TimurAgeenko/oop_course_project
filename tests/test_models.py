@@ -1,6 +1,6 @@
 from unittest.mock import Mock, patch
 
-from src.models import APIHandler, Aeroplane
+from src.models import Aeroplane, APIHandler
 
 
 def make_osm_response(bbox):
