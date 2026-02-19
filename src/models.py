@@ -1,3 +1,5 @@
+import json
+import os
 from abc import ABC, abstractmethod
 
 import requests
@@ -6,7 +8,7 @@ import requests
 class BaseAPIHandler(ABC):
 
     @abstractmethod
-    def get_aeroplane(self, country: str) -> str:
+    def get_aeroplanes(self, country: str) -> str:
         pass
 
 
@@ -18,7 +20,7 @@ class APIHandler(BaseAPIHandler):
         self.opensky_url = "https://opensky-network.org/api/states/all?"
         self.aeroplanes = None
 
-    def get_aeroplane(self, country: str) -> None:
+    def get_aeroplanes(self, country: str) -> None:
         """Метод для получения информации о самолетах, находящихся в воздухе над определенной страной"""
         headers = {
             "User-Agent": "test-app",
@@ -68,6 +70,85 @@ class Aeroplane:
         return sorted_aeroplanes[:top_n]
 
     @staticmethod
-    def get_aeroplanes(aeroplanes: list, country: str) -> list:
+    def get_aeroplanes_by_country(aeroplanes: list, country: str) -> list:
         """Метод для получения списка самолётов, отфильтрованных по стране регистрации"""
         return [aeroplane for aeroplane in aeroplanes if aeroplane.country == country]
+
+
+class BaseJSONHandler(ABC):
+
+    @abstractmethod
+    def add_aeroplane(self, aeroplane: Aeroplane) -> str:
+        pass
+
+    @abstractmethod
+    def get_aeroplane(self, callsign: str) -> dict | str:
+        pass
+
+    @abstractmethod
+    def delete_aeroplane(self, callsign: str) -> str:
+        pass
+
+
+class JSONHandler(BaseJSONHandler):
+    """Класс для работы с файлами в формате json."""
+
+    def __init__(self, path: str = "../data/aeroplanes.json"):
+        self.path = path
+
+    def get_aeroplanes_list(self) -> list[dict]:
+        """Метод для получения списка словарей с данными о самолетах."""
+        if os.path.exists(self.path) and os.path.getsize(self.path) > 0:
+            with open(self.path, "r") as f:
+                data = json.load(f)
+        else:
+            data = []
+
+        return data
+
+    def add_aeroplane(self, aeroplane: Aeroplane) -> str:
+        """Метод для добавления информации о самолете в файл."""
+        if not isinstance(aeroplane, Aeroplane):
+            raise ValueError("Добавлять в файл можно только объекты класса Aeroplane.")
+
+        data = self.get_aeroplanes_list()
+
+        aeroplane_dict = {
+            "callsign": aeroplane.callsign,
+            "country": aeroplane.country,
+            "velocity": aeroplane.velocity,
+            "altitude": aeroplane.altitude,
+        }
+
+        data.append(aeroplane_dict)
+
+        with open(self.path, "w") as file:
+            json.dump(data, file, indent=4)
+
+        return "Информация о самолете добавлена в файл."
+
+    def get_aeroplane(self, callsign: str) -> dict | str:
+        """Метод для получения информации о самолете по его позывному."""
+        data = self.get_aeroplanes_list()
+
+        if data:
+            aeroplane = [aeroplane for aeroplane in data if aeroplane["callsign"] == callsign]
+            if aeroplane:
+                return aeroplane[0]
+
+        return "Самолет с указанным позывным отсутствует в файле."
+
+    def delete_aeroplane(self, callsign: str) -> str:
+        """Метод для удаления информации о самолете по его позывному"""
+        data = self.get_aeroplanes_list()
+        aeroplane = self.get_aeroplane(callsign)
+
+        if aeroplane == "Самолет с указанным позывным отсутствует в файле.":
+            return aeroplane
+
+        data.remove(aeroplane)
+
+        with open(self.path, "w") as file:
+            json.dump(data, file, indent=4)
+
+        return "Самолет с указанным позывным успешно удален из файла"

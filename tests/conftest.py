@@ -5,7 +5,7 @@ from src.models import Aeroplane
 
 @pytest.fixture
 def aeroplane():
-    return Aeroplane(callsign="CALLSIGN", country="COUNTRY", velocity=1.0, altitude=2.0)
+    return Aeroplane("CALLSIGN", "COUNTRY", 1.0, 2.0)
 
 
 @pytest.fixture

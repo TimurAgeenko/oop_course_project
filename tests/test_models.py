@@ -1,6 +1,10 @@
+import json
+import os
 from unittest.mock import Mock, patch
 
-from src.models import Aeroplane, APIHandler
+import pytest
+
+from src.models import Aeroplane, APIHandler, JSONHandler
 
 
 def make_osm_response(bbox):
@@ -16,7 +20,7 @@ def make_opensky_response(states):
 
 
 @patch("src.models.requests.get")
-def test_get_aeroplane(mock_get):
+def test_get_aeroplanes(mock_get):
     bbox = ["-44.0", "-10.0", "112.0", "154.0"]
     osm_resp = make_osm_response(bbox)
 
@@ -26,7 +30,7 @@ def test_get_aeroplane(mock_get):
     mock_get.side_effect = [osm_resp, opensky_resp]
 
     api = APIHandler()
-    api.get_aeroplane("australia")
+    api.get_aeroplanes("australia")
 
     assert api.aeroplanes == [sample_state]
 
@@ -72,9 +76,73 @@ def test_get_top_altitude_aeroplanes(aeroplanes):
     assert top_aeroplanes[1].callsign == "CALLSIGN3"
 
 
-def test_get_aeroplanes(aeroplanes):
-    sorted_aeroplanes = Aeroplane.get_aeroplanes(aeroplanes, "COUNTRY3")
+def test_get_aeroplanes_by_country(aeroplanes):
+    sorted_aeroplanes = Aeroplane.get_aeroplanes_by_country(aeroplanes, "COUNTRY3")
 
     assert len(sorted_aeroplanes) == 2
     assert sorted_aeroplanes[0].callsign == "CALLSIGN3"
     assert sorted_aeroplanes[1].callsign == "CALLSIGN4"
+
+
+def test_get_aeroplanes_list():
+    handler = JSONHandler("./data/test.json")
+
+    assert handler.get_aeroplanes_list() == []
+
+    data = [{"callsign": "CALLSIGN", "country": "COUNTRY", "velocity": 1.0, "altitude": 2.0}]
+
+    with open(handler.path, "w") as f:
+        json.dump(data, f, indent=4)
+
+    assert handler.get_aeroplanes_list() == [
+        {"callsign": "CALLSIGN", "country": "COUNTRY", "velocity": 1.0, "altitude": 2.0}
+    ]
+
+    os.remove(handler.path)
+
+
+def test_add_aeroplane(aeroplane):
+    handler = JSONHandler("./data/test.json")
+
+    handler.add_aeroplane(aeroplane)
+
+    assert handler.get_aeroplanes_list() == [
+        {"callsign": "CALLSIGN", "country": "COUNTRY", "velocity": 1.0, "altitude": 2.0}
+    ]
+
+    os.remove(handler.path)
+
+
+def test_add_aeroplane_value_error():
+    handler = JSONHandler("./data/test.json")
+
+    with pytest.raises(ValueError, match="Добавлять в файл можно только объекты класса Aeroplane."):
+        handler.add_aeroplane("aeroplane")
+
+
+def test_get_aeroplane(aeroplane):
+    handler = JSONHandler("./data/test.json")
+
+    handler.add_aeroplane(aeroplane)
+
+    airplane = handler.get_aeroplane("CALLSIG")
+    assert airplane == "Самолет с указанным позывным отсутствует в файле."
+
+    airplane = handler.get_aeroplane("CALLSIGN")
+    assert airplane.get("callsign") == "CALLSIGN"
+
+    os.remove(handler.path)
+
+
+def test_delete_aeroplane(aeroplane):
+    handler = JSONHandler("./data/test.json")
+
+    handler.add_aeroplane(aeroplane)
+
+    airplane = handler.delete_aeroplane("CALLSIG")
+    assert airplane == "Самолет с указанным позывным отсутствует в файле."
+
+    airplane = handler.delete_aeroplane("CALLSIGN")
+    assert airplane == "Самолет с указанным позывным успешно удален из файла"
+
+    os.remove(handler.path)
