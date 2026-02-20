@@ -84,6 +84,19 @@ def test_get_aeroplanes_by_country(aeroplanes):
     assert sorted_aeroplanes[1].callsign == "CALLSIGN4"
 
 
+def test_get_aeroplanes_by_altitude(aeroplanes):
+    sorted_aeroplanes = Aeroplane.get_aeroplanes_by_altitude(aeroplanes, "3-7")
+
+    assert len(sorted_aeroplanes) == 2
+    assert sorted_aeroplanes[0].callsign == "CALLSIGN2"
+    assert sorted_aeroplanes[1].callsign == "CALLSIGN3"
+
+
+def test_get_aeroplanes_by_altitude_invalid_format(aeroplanes):
+    with pytest.raises(ValueError, match="Высота должна быть задана в виде строки, например: '10000-20000'"):
+        Aeroplane.get_aeroplanes_by_altitude(aeroplanes, "invalid_format")
+
+
 def test_get_aeroplanes_list():
     handler = JSONHandler("./data/test.json")
 

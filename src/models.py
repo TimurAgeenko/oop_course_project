@@ -74,6 +74,22 @@ class Aeroplane:
         """Метод для получения списка самолётов, отфильтрованных по стране регистрации"""
         return [aeroplane for aeroplane in aeroplanes if aeroplane.country == country]
 
+    @staticmethod
+    def get_aeroplanes_by_altitude(aeroplanes: list, altitude: str) -> list:
+        """Метод для получения списка самолётов, отфильтрованных по высоте,
+        высота задается в виде строки, например: "10000-20000" """
+        altitude_range = altitude.split("-")
+        if len(altitude_range) != 2:
+            raise ValueError("Высота должна быть задана в виде строки, например: '10000-20000'")
+
+        try:
+            min_altitude = float(altitude_range[0])
+            max_altitude = float(altitude_range[1])
+        except ValueError:
+            raise ValueError("Высота должна быть задана в виде строки, например: '10000-20000'")
+
+        return [aeroplane for aeroplane in aeroplanes if min_altitude <= aeroplane.altitude <= max_altitude]
+
 
 class BaseJSONHandler(ABC):
 
