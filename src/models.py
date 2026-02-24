@@ -112,6 +112,8 @@ class JSONHandler(BaseJSONHandler):
 
     def __init__(self, path: str = "../data/aeroplanes.json"):
         self.path = path
+        if not os.path.exists(self.path):
+            open(self.path, "w").close()
 
     def get_aeroplanes_list(self, country: str = None, date: str = None) -> list[dict]:
         """Метод для получения списка словарей с данными о самолетах."""
