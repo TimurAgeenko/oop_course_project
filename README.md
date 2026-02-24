@@ -141,43 +141,66 @@
     ```
     В файле aeroplanes.json лежит следующая информация:
     [
-    {"callsign": "CALLSIGN",
-    "country": "COUNTRY",
-    "velocity": 1.0,
-    "altitude": 2.0}
+        {
+            "country": "Canada",
+            "date": "24-02-2026 21:10:45",
+            "aeroplanes": [{"callsign": "CALLSIGN1", "country": "COUNTRY1", "velocity": 1.0, "altitude": 2.0}]
+        },
+        {
+            "country": "Australia",
+            "date": "24.02.2026 22:10:45",
+            "aeroplanes": [{"callsign": "CALLSIGN2", "country": "COUNTRY2", "velocity": 1.0, "altitude": 2.0}]
+        }
     ]
     
     json_handler = JSONHandler()
-    data = json_handler.get_aeroplanes_list()
     
-    print(data) # Выведет [{"callsign": "CALLSIGN", "country": "COUNTRY", "velocity": 1.0, "altitude": 2.0}]
+    data = json_handler.get_aeroplanes_list()
+    print(data[0]["aeroplanes"]) # Выведет [{"callsign": "CALLSIGN1", "country": "COUNTRY1", "velocity": 1.0, "altitude": 2.0}]
+    
+    data = json_handler.get_aeroplanes_list("Australia", "24.02.2026 22:10:45")
+    print(data) # Выведет [{"callsign": "CALLSIGN2", "country": "COUNTRY2", "velocity": 1.0, "altitude": 2.0}]
     ```
     
-12. У класса JSONHandler есть метод add_aeroplane, который используется для добавления информации о самолете в файл.
+12. У класса JSONHandler есть метод add_aeroplanes, который используется для добавления информации о самолетах в файл.
     ```
     json_handler = JSONHandler()
-    aeroplane = Aeroplane("CALLSIGN", "COUNTRY", 1.0, 2.0)
+    aeroplanes = [
+        Aeroplane("CALLSIGN1", "COUNTRY1", 1.0, 2.0),
+        Aeroplane("CALLSIGN2", "COUNTRY2", 3.0, 4.0),
+        Aeroplane("CALLSIGN3", "COUNTRY3", 5.0, 6.0),
+        Aeroplane("CALLSIGN4", "COUNTRY3", 7.0, 8.0),
+    ]
     
-    json_handler.add_aeroplane(aeroplane)
+    json_handler.add_aeroplanes(aeroplane, "Canada")
     data = json_handler.get_aeroplanes_list()
     
-    print(data) # Выведет [{"callsign": "CALLSIGN", "country": "COUNTRY", "velocity": 1.0, "altitude": 2.0}]
+    print(len(data)) # Выведет 1
+    print(data[0]["country"]) # Выведет "Canada"
+    print(data[0]["aeroplanes"][0]["callsign"]) # Выведет "CALLSIGN1"
+    print(data[0]["aeroplanes"][1]["callsign"]) # Выведет "CALLSIGN2"
     ```
     
 13. У класса JSONHandler есть метод get_aeroplane, который используется для получения информации о самолете по его позывному.
     ```
     В файле aeroplanes.json лежит следующая информация:
     [
-    {"callsign": "CALLSIGN",
-    "country": "COUNTRY",
-    "velocity": 1.0,
-    "altitude": 2.0}
+        {
+            "country": "Canada",
+            "date": "24-02-2026 21:10:45",
+            "aeroplanes": [{"callsign": "CALLSIGN1", "country": "COUNTRY1", "velocity": 1.0, "altitude": 2.0}]
+        },
+        {
+            "country": "Australia",
+            "date": "24.02.2026 22:10:45",
+            "aeroplanes": [{"callsign": "CALLSIGN2", "country": "COUNTRY2", "velocity": 1.0, "altitude": 2.0}]
+        }
     ]
     
     json_handler = JSONHandler()
     
-    aeroplane = json_handler.get_aeroplane("CALLSIGN")
-    print(aeroplane) # Выведет {"callsign": "CALLSIGN", "country": "COUNTRY", "velocity": 1.0, "altitude": 2.0}
+    aeroplane = json_handler.get_aeroplane("CALLSIGN1")
+    print(aeroplane) # Выведет {"callsign": "CALLSIGN1", "country": "COUNTRY1", "velocity": 1.0, "altitude": 2.0}
     
     aeroplane = json_handler.get_aeroplane("NOT_EXISTING_CALLSIGN")
     print(aeroplane) # Выведет "Самолет с указанным позывным отсутствует в файле."
@@ -187,10 +210,16 @@
     ```
     В файле aeroplanes.json лежит следующая информация:
     [
-    {"callsign": "CALLSIGN",
-    "country": "COUNTRY",
-    "velocity": 1.0,
-    "altitude": 2.0}
+        {
+            "country": "Canada",
+            "date": "24-02-2026 21:10:45",
+            "aeroplanes": [{"callsign": "CALLSIGN1", "country": "COUNTRY1", "velocity": 1.0, "altitude": 2.0}]
+        },
+        {
+            "country": "Australia",
+            "date": "24.02.2026 22:10:45",
+            "aeroplanes": [{"callsign": "CALLSIGN2", "country": "COUNTRY2", "velocity": 1.0, "altitude": 2.0}]
+        }
     ]
     
     json_handler = JSONHandler()

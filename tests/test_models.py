@@ -112,7 +112,7 @@ def test_get_aeroplanes_list():
         {
             "country": "Australia",
             "date": "24.02.2026 22:10:45",
-            "aeroplanes": [{"callsign": "CALLSIGN1", "country": "COUNTRY1", "velocity": 1.0, "altitude": 2.0}],
+            "aeroplanes": [{"callsign": "CALLSIGN2", "country": "COUNTRY2", "velocity": 2.0, "altitude": 4.0}],
         },
     ]
 
