@@ -70,9 +70,9 @@ class Aeroplane:
         return sorted_aeroplanes[:top_n]
 
     @staticmethod
-    def get_aeroplanes_by_country(aeroplanes: list, country: str) -> list:
+    def get_aeroplanes_by_country(aeroplanes: list, country: list) -> list:
         """Метод для получения списка самолётов, отфильтрованных по стране регистрации"""
-        return [aeroplane for aeroplane in aeroplanes if aeroplane.country == country]
+        return [aeroplane for aeroplane in aeroplanes if aeroplane.country in country]
 
     @staticmethod
     def get_aeroplanes_by_altitude(aeroplanes: list, altitude: str) -> list:

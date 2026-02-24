@@ -77,11 +77,12 @@ def test_get_top_altitude_aeroplanes(aeroplanes):
 
 
 def test_get_aeroplanes_by_country(aeroplanes):
-    sorted_aeroplanes = Aeroplane.get_aeroplanes_by_country(aeroplanes, "COUNTRY3")
+    sorted_aeroplanes = Aeroplane.get_aeroplanes_by_country(aeroplanes, ["COUNTRY1", "COUNTRY3"])
 
-    assert len(sorted_aeroplanes) == 2
-    assert sorted_aeroplanes[0].callsign == "CALLSIGN3"
-    assert sorted_aeroplanes[1].callsign == "CALLSIGN4"
+    assert len(sorted_aeroplanes) == 3
+    assert sorted_aeroplanes[0].callsign == "CALLSIGN1"
+    assert sorted_aeroplanes[1].callsign == "CALLSIGN3"
+    assert sorted_aeroplanes[2].callsign == "CALLSIGN4"
 
 
 def test_get_aeroplanes_by_altitude(aeroplanes):

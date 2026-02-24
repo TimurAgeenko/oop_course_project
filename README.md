@@ -106,11 +106,12 @@
         Aeroplane("CALLSIGN4", "COUNTRY3", 7.0, 8.0),
    ]
    
-   sorted_aeroplanes = Aeroplane.get_aeroplanes_by_country(aeroplanes, "COUNTRY3")
+   sorted_aeroplanes = Aeroplane.get_aeroplanes_by_country(aeroplanes, ["COUNTRY1", "COUNTRY3"])
    
-   print(len(sorted_aeroplanes)) # Выведет 2
-   print(sorted_aeroplanes[0].callsign) # Выведет "CALLSIGN3"
-   print(sorted_aeroplanes[1].callsign) # Выведет "CALLSIGN4"
+   print(len(sorted_aeroplanes)) # Выведет 3
+   print(sorted_aeroplanes[0].callsign) # Выведет "CALLSIGN1"
+   print(sorted_aeroplanes[1].callsign) # Выведет "CALLSIGN3"
+   print(sorted_aeroplanes[2].callsign) # Выведет "CALLSIGN4"
    ```
    
 9. У класса Aeroplane есть статический метод get_aeroplanes_by_altitude, который используется для фильтрации самолетов по высоте полета.
