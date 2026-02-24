@@ -34,7 +34,8 @@
    ```
    api_handler = APIHandler()
    
-   aeroplanes = api_handler.get_aeroplanes()
+   api_handler.get_aeroplanes()
+   aeroplanes = api.handler.aeroplanes
    
    print(aeroplanes[0]) 
    
