@@ -110,7 +110,7 @@ class BaseJSONHandler(ABC):
 class JSONHandler(BaseJSONHandler):
     """Класс для работы с файлами в формате json."""
 
-    def __init__(self, path: str = "../data/aeroplanes.json"):
+    def __init__(self, path: str = "./data/aeroplanes.json"):
         self.path = path
         if not os.path.exists(self.path):
             open(self.path, "w").close()
@@ -161,7 +161,7 @@ class JSONHandler(BaseJSONHandler):
 
         if data:
             aeroplane = [
-                aeroplane for item in data for aeroplane in item["aeroplanes"] if aeroplane["callsign"] == callsign
+                aeroplane for item in data for aeroplane in item["aeroplanes"] if aeroplane["callsign"].replace(" ", "") == callsign
             ]
             if aeroplane:
                 return aeroplane[0]
@@ -177,7 +177,7 @@ class JSONHandler(BaseJSONHandler):
             return aeroplane
 
         item_index = [
-            data.index(item) for item in data for aeroplane in item["aeroplanes"] if aeroplane["callsign"] == callsign
+            data.index(item) for item in data for aeroplane in item["aeroplanes"] if aeroplane["callsign"].replace(" ", "") == callsign
         ][0]
 
         item = data.pop(item_index)
