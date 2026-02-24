@@ -156,6 +156,6 @@ def test_delete_aeroplane(aeroplane):
     assert airplane == "Самолет с указанным позывным отсутствует в файле."
 
     airplane = handler.delete_aeroplane("CALLSIGN")
-    assert airplane == "Самолет с указанным позывным успешно удален из файла"
+    assert airplane == "Самолет с указанным позывным успешно удален из файла."
 
     os.remove(handler.path)

@@ -167,4 +167,4 @@ class JSONHandler(BaseJSONHandler):
         with open(self.path, "w") as file:
             json.dump(data, file, indent=4)
 
-        return "Самолет с указанным позывным успешно удален из файла"
+        return "Самолет с указанным позывным успешно удален из файла."
