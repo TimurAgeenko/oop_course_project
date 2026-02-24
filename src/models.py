@@ -1,3 +1,4 @@
+import datetime as dt
 import json
 import os
 from abc import ABC, abstractmethod
@@ -94,7 +95,7 @@ class Aeroplane:
 class BaseJSONHandler(ABC):
 
     @abstractmethod
-    def add_aeroplane(self, aeroplane: Aeroplane) -> str:
+    def add_aeroplanes(self, aeroplanes_list: list[Aeroplane], country: str) -> str:
         pass
 
     @abstractmethod
@@ -112,31 +113,40 @@ class JSONHandler(BaseJSONHandler):
     def __init__(self, path: str = "../data/aeroplanes.json"):
         self.path = path
 
-    def get_aeroplanes_list(self) -> list[dict]:
+    def get_aeroplanes_list(self, country: str = None, date: str = None) -> list[dict]:
         """Метод для получения списка словарей с данными о самолетах."""
         if os.path.exists(self.path) and os.path.getsize(self.path) > 0:
             with open(self.path, "r") as f:
                 data = json.load(f)
+            if country and date:
+                data = [item["aeroplane"] for item in data if item["country"] == country and item["date"] == date]
         else:
             data = []
 
         return data
 
-    def add_aeroplane(self, aeroplane: Aeroplane) -> str:
-        """Метод для добавления информации о самолете в файл."""
-        if not isinstance(aeroplane, Aeroplane):
-            raise ValueError("Добавлять в файл можно только объекты класса Aeroplane.")
-
+    def add_aeroplanes(self, aeroplanes_list: list[Aeroplane], country: str) -> str:
+        """Метод для добавления информации о самолетах в файл."""
         data = self.get_aeroplanes_list()
+        date = dt.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        aeroplanes_info = []
 
-        aeroplane_dict = {
-            "callsign": aeroplane.callsign,
-            "country": aeroplane.country,
-            "velocity": aeroplane.velocity,
-            "altitude": aeroplane.altitude,
-        }
+        for aeroplane in aeroplanes_list:
+            if not isinstance(aeroplane, Aeroplane):
+                raise ValueError("Добавлять в файл можно только объекты класса Aeroplane.")
 
-        data.append(aeroplane_dict)
+            aeroplane_dict = {
+                "callsign": aeroplane.callsign,
+                "country": aeroplane.country,
+                "velocity": aeroplane.velocity,
+                "altitude": aeroplane.altitude,
+            }
+
+            aeroplanes_info.append(aeroplane_dict)
+
+        result = {"country": country, "date": date, "aeroplanes": aeroplanes_info}
+
+        data.append(result)
 
         with open(self.path, "w") as file:
             json.dump(data, file, indent=4)
@@ -148,7 +158,9 @@ class JSONHandler(BaseJSONHandler):
         data = self.get_aeroplanes_list()
 
         if data:
-            aeroplane = [aeroplane for aeroplane in data if aeroplane["callsign"] == callsign]
+            aeroplane = [
+                aeroplane for item in data for aeroplane in item["aeroplanes"] if aeroplane["callsign"] == callsign
+            ]
             if aeroplane:
                 return aeroplane[0]
 
@@ -162,7 +174,13 @@ class JSONHandler(BaseJSONHandler):
         if aeroplane == "Самолет с указанным позывным отсутствует в файле.":
             return aeroplane
 
-        data.remove(aeroplane)
+        item_index = [
+            data.index(item) for item in data for aeroplane in item["aeroplanes"] if aeroplane["callsign"] == callsign
+        ][0]
+
+        item = data.pop(item_index)
+        item["aeroplanes"].remove(aeroplane)
+        data.append(item)
 
         with open(self.path, "w") as file:
             json.dump(data, file, indent=4)
