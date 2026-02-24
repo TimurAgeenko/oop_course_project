@@ -119,7 +119,7 @@ class JSONHandler(BaseJSONHandler):
             with open(self.path, "r") as f:
                 data = json.load(f)
             if country and date:
-                data = [item["aeroplane"] for item in data if item["country"] == country and item["date"] == date]
+                data = [item["aeroplanes"] for item in data if item["country"] == country and item["date"] == date][0]
         else:
             data = []
 
