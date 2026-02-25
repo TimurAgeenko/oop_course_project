@@ -1,0 +1,46 @@
+from unittest.mock import Mock, patch
+
+from src.api import APIHandler
+
+
+def make_osm_response(bbox):
+    resp = Mock()
+    resp.json.return_value = [{"boundingbox": bbox}]
+    return resp
+
+
+def make_opensky_response(states):
+    resp = Mock()
+    resp.json.return_value = {"states": states}
+    return resp
+
+
+@patch("src.api.requests.get")
+def test_get_aeroplanes(mock_get):
+    bbox = ["-44.0", "-10.0", "112.0", "154.0"]
+    osm_resp = make_osm_response(bbox)
+
+    sample_state = ["abc123", "CALLSIGN", "", 0.0, 0.0, 1.0, 2.0, 3.0]
+    opensky_resp = make_opensky_response([sample_state])
+
+    mock_get.side_effect = [osm_resp, opensky_resp]
+
+    api = APIHandler()
+    api.get_aeroplanes("australia")
+
+    assert api.aeroplanes == [sample_state]
+
+    assert mock_get.call_count == 2
+
+    calls = mock_get.call_args_list
+
+    first_call = calls[0]
+    assert first_call[0][0] == "https://nominatim.openstreetmap.org/search?"
+    assert first_call[1]["params"]["q"] == "australia"
+
+    second_call = calls[1]
+    assert second_call[0][0] == "https://opensky-network.org/api/states/all?"
+    assert second_call[1]["params"]["lamin"] == bbox[0]
+    assert second_call[1]["params"]["lamax"] == bbox[1]
+    assert second_call[1]["params"]["lomin"] == bbox[2]
+    assert second_call[1]["params"]["lomax"] == bbox[3]

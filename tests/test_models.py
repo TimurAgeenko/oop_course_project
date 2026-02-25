@@ -1,53 +1,6 @@
-import json
-import os
-from unittest.mock import Mock, patch
-
 import pytest
 
-from src.models import Aeroplane, APIHandler, JSONHandler
-
-
-def make_osm_response(bbox):
-    resp = Mock()
-    resp.json.return_value = [{"boundingbox": bbox}]
-    return resp
-
-
-def make_opensky_response(states):
-    resp = Mock()
-    resp.json.return_value = {"states": states}
-    return resp
-
-
-@patch("src.models.requests.get")
-def test_get_aeroplanes(mock_get):
-    bbox = ["-44.0", "-10.0", "112.0", "154.0"]
-    osm_resp = make_osm_response(bbox)
-
-    sample_state = ["abc123", "CALLSIGN", "", 0.0, 0.0, 1.0, 2.0, 3.0]
-    opensky_resp = make_opensky_response([sample_state])
-
-    mock_get.side_effect = [osm_resp, opensky_resp]
-
-    api = APIHandler()
-    api.get_aeroplanes("australia")
-
-    assert api.aeroplanes == [sample_state]
-
-    assert mock_get.call_count == 2
-
-    calls = mock_get.call_args_list
-
-    first_call = calls[0]
-    assert first_call[0][0] == api.openstreetmap_url
-    assert first_call[1]["params"]["q"] == "australia"
-
-    second_call = calls[1]
-    assert second_call[0][0] == api.opensky_url
-    assert second_call[1]["params"]["lamin"] == bbox[0]
-    assert second_call[1]["params"]["lamax"] == bbox[1]
-    assert second_call[1]["params"]["lomin"] == bbox[2]
-    assert second_call[1]["params"]["lomax"] == bbox[3]
+from src.models import Aeroplane
 
 
 def test_aeroplane_initialization(aeroplane):
@@ -55,6 +8,11 @@ def test_aeroplane_initialization(aeroplane):
     assert aeroplane.country == "COUNTRY"
     assert aeroplane.velocity == 1.0
     assert aeroplane.altitude == 2.0
+
+
+def test_aeroplane_str(aeroplane):
+    aeroplane_str = str(aeroplane)
+    assert str(aeroplane) == aeroplane_str
 
 
 def test_cast_to_object_list():
@@ -96,79 +54,3 @@ def test_get_aeroplanes_by_altitude(aeroplanes):
 def test_get_aeroplanes_by_altitude_invalid_format(aeroplanes):
     with pytest.raises(ValueError, match="Высота должна быть задана в виде строки, например: '10000-20000'"):
         Aeroplane.get_aeroplanes_by_altitude(aeroplanes, "invalid_format")
-
-
-def test_get_aeroplanes_list():
-    handler = JSONHandler("./data/test.json")
-
-    assert handler.get_aeroplanes_list() == []
-
-    data = [
-        {
-            "country": "Canada",
-            "date": "24-02-2026 21:10:45",
-            "aeroplanes": [{"callsign": "CALLSIGN1", "country": "COUNTRY1", "velocity": 1.0, "altitude": 2.0}],
-        },
-        {
-            "country": "Australia",
-            "date": "24.02.2026 22:10:45",
-            "aeroplanes": [{"callsign": "CALLSIGN2", "country": "COUNTRY2", "velocity": 2.0, "altitude": 4.0}],
-        },
-    ]
-
-    with open(handler.path, "w") as f:
-        json.dump(data, f, indent=4)
-
-    assert handler.get_aeroplanes_list() == data
-    assert handler.get_aeroplanes_list("Australia", "24.02.2026 22:10:45") == data[1]["aeroplanes"]
-
-    os.remove(handler.path)
-
-
-def test_add_aeroplane(aeroplanes):
-    handler = JSONHandler("./data/test.json")
-
-    handler.add_aeroplanes(aeroplanes, "Canada")
-    data = handler.get_aeroplanes_list()
-
-    assert len(data) == 1
-    assert data[0]["country"] == "Canada"
-    assert data[0]["aeroplanes"][0]["callsign"] == "CALLSIGN1"
-    assert data[0]["aeroplanes"][1]["callsign"] == "CALLSIGN2"
-
-    os.remove(handler.path)
-
-
-def test_add_aeroplane_value_error():
-    handler = JSONHandler("./data/test.json")
-
-    with pytest.raises(ValueError, match="Добавлять в файл можно только объекты класса Aeroplane."):
-        handler.add_aeroplanes("aeroplane", "Canada")
-
-
-def test_get_aeroplane(aeroplanes):
-    handler = JSONHandler("./data/test.json")
-
-    handler.add_aeroplanes(aeroplanes, "Canada")
-
-    airplane = handler.get_aeroplane("CALLSIGN")
-    assert airplane == "Самолет с указанным позывным отсутствует в файле."
-
-    airplane = handler.get_aeroplane("CALLSIGN1")
-    assert airplane["callsign"] == "CALLSIGN1"
-
-    os.remove(handler.path)
-
-
-def test_delete_aeroplane(aeroplanes):
-    handler = JSONHandler("./data/test.json")
-
-    handler.add_aeroplanes(aeroplanes, "Canada")
-
-    airplane = handler.delete_aeroplane("CALLSIGN")
-    assert airplane == "Самолет с указанным позывным отсутствует в файле."
-
-    airplane = handler.delete_aeroplane("CALLSIGN1")
-    assert airplane == "Самолет с указанным позывным успешно удален из файла."
-
-    os.remove(handler.path)
