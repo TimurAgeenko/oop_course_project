@@ -1,5 +1,6 @@
 class Aeroplane:
     """Класс для представления самолета"""
+    __slots__ = ("callsign", "country", "velocity", "altitude")
 
     def __init__(self, callsign: str, country: str, velocity: float, altitude: float):
         self.callsign = callsign
