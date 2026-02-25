@@ -56,9 +56,20 @@ class Aeroplane:
         self.velocity = velocity
         self.altitude = altitude
 
+    def __str__(self):
+        callsign_str = f"'Позывной': {self.callsign.replace(" ", "")}"
+        country_str = f"'Страна регистрации': {self.country}"
+        velocity_str = f"'Скорость': {self.velocity}"
+        altitude_str = f"'Высота полета': {self.altitude}"
+
+        return callsign_str + ", " + country_str + ", " + velocity_str + ", " + altitude_str
+
     @classmethod
     def cast_to_object_list(cls, aeroplanes: list) -> list:
         """Метод для преобразования списка данных о самолетах в список объектов класса Aeroplane"""
+        for aeroplane in aeroplanes:
+            if not aeroplane[13]:
+                aeroplane[13] = 0
         return [
             cls(callsign=aeroplane[1], country=aeroplane[2], velocity=aeroplane[9], altitude=aeroplane[13])
             for aeroplane in aeroplanes
@@ -110,8 +121,10 @@ class BaseJSONHandler(ABC):
 class JSONHandler(BaseJSONHandler):
     """Класс для работы с файлами в формате json."""
 
-    def __init__(self, path: str = "../data/aeroplanes.json"):
+    def __init__(self, path: str = "./data/aeroplanes.json"):
         self.path = path
+        if not os.path.exists(self.path):
+            open(self.path, "w").close()
 
     def get_aeroplanes_list(self, country: str = None, date: str = None) -> list[dict]:
         """Метод для получения списка словарей с данными о самолетах."""
@@ -159,7 +172,10 @@ class JSONHandler(BaseJSONHandler):
 
         if data:
             aeroplane = [
-                aeroplane for item in data for aeroplane in item["aeroplanes"] if aeroplane["callsign"] == callsign
+                aeroplane
+                for item in data
+                for aeroplane in item["aeroplanes"]
+                if aeroplane["callsign"].replace(" ", "") == callsign
             ]
             if aeroplane:
                 return aeroplane[0]
@@ -175,7 +191,10 @@ class JSONHandler(BaseJSONHandler):
             return aeroplane
 
         item_index = [
-            data.index(item) for item in data for aeroplane in item["aeroplanes"] if aeroplane["callsign"] == callsign
+            data.index(item)
+            for item in data
+            for aeroplane in item["aeroplanes"]
+            if aeroplane["callsign"].replace(" ", "") == callsign
         ][0]
 
         item = data.pop(item_index)
